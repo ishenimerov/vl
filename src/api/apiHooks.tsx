@@ -4,9 +4,6 @@ import md5 from 'crypto-js/md5';
 
 const apiUrl = 'https://api.valantis.store:41000';
 
-interface GetIdsResponse {
-  result: string[];
-}
 export const getAuthHeader = (): AxiosRequestConfig['headers'] => {
   const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
 
@@ -20,10 +17,7 @@ export const getAuthHeader = (): AxiosRequestConfig['headers'] => {
 };
 
 export const apiService = {
-  getIds: async (
-    offset: number,
-    limit: number,
-  ): Promise<GetIdsResponse['result']> => {
+  getIds: async (offset: number, limit: number) => {
     try {
       const response = await axios.post(
         `${apiUrl}/`,
@@ -32,8 +26,53 @@ export const apiService = {
       );
 
       return response.data.result;
-    } catch (error: any) {
-      console.error('Error fetching IDs:', error.response?.status);
+    } catch (error) {
+      console.error('Error fetching IDs:', (error as any).response?.message);
+      throw error;
+    }
+  },
+
+  getItems: async (ids: string[]) => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/`,
+        { action: 'get_items', params: { ids } },
+        { headers: getAuthHeader() },
+      );
+
+      return response.data.result;
+    } catch (error) {
+      console.error('Error fetching items:', (error as any).response?.message);
+      throw error;
+    }
+  },
+
+  getFields: async (field: string, offset: number, limit: number) => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/`,
+        { action: 'get_fields', params: { field, offset, limit } },
+        { headers: getAuthHeader() },
+      );
+
+      return response.data.result;
+    } catch (error) {
+      console.error('Error fetching fields:', (error as any).response?.message);
+      throw error;
+    }
+  },
+
+  filter: async (field: string, value: any) => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/`,
+        { action: 'filter', params: { [field]: value } },
+        { headers: getAuthHeader() },
+      );
+
+      return response.data.result;
+    } catch (error) {
+      console.error('Error filtering:', (error as any).response?.message);
       throw error;
     }
   },
